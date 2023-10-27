@@ -85,9 +85,10 @@ int find() {  //寻找下一个可以运行的进程，如果没有则返回-1
 }
 
 bool isSafe() {
-	int seq[count];  //给出进程运行序列
+	int n = count;
+	int seq[100];  //给出进程运行序列
 	int nextEvent = -1;  //代表下一个可运行的进程，如果等于-1则说明没有了
-	for (int i = 0; i < count; i++) {
+	for (int i = 0; i < n; i++) {
 		nextEvent = find();
 		if (nextEvent == -1) {  //一旦出现-1就说明系统资源无法满足剩下的所有进程的运行，则系统不安全
 			return (false);
@@ -152,28 +153,33 @@ bool extraAllo() {
 		scanf("%d", &change[i]);
 	}
 	PCB* temp = events;
-	while (temp->no != num) {  //找到与用户输入进程号相匹配的进程
-		if (temp == NULL) {  //进程全部寻找完仍没有寻找到匹配的进程，则放弃更改
-			printf("进程不存在！分配失败！");
-			return (false);
-		}
-		else {
-			temp = temp->next;
-		}
-	}
-	for (int i = 0; i < N; i++) {  //更改进程数据以及系统资源数据
-		temp->allo[i] += change[i];
-		available[i] -= change[i];
-	}
-	printf("-----------------------------\n资源分配成功！新的进程信息与系统资源如下：\n");
-	printf("No.\tMax\t\tAllocation\tNeed\n");
-	temp = events;
-	while (temp != NULL) {
-		display(temp);
+	while (temp != NULL && temp->no != num) {  //找到与用户输入进程号相匹配的进程
 		temp = temp->next;
 	}
-	printf("系统可用资源：%d %d %d\n", available[0], available[1], available[2]);
-	printf("-----------------------------\n");
+	if (temp == NULL) {
+		printf("未找到相关进程！分配失败！\n");
+	}
+	else {
+		for (int i = 0; i < N; i++) {  //更改进程数据以及系统资源数据
+			temp->allo[i] += change[i];
+			temp->need[i] -= change[i];
+			available[i] -= change[i];
+		}
+		printf("-----------------------------\n资源分配成功！新的进程信息与系统资源如下：\n");
+		printf("No.\tMax\t\tAllocation\tNeed\n");
+		temp = events;
+		while (temp != NULL) {
+			display(temp);
+			temp = temp->next;
+		}
+		printf("系统可用资源：%d %d %d\n", available[0], available[1], available[2]);
+	}
+	printf("-----------------------------\n是否还需要额外分配资源？是=1，否=其他：");
+	int choice = 0;
+	scanf("%d", &choice);
+	if (choice == 1) {
+		extraAllo();
+	}
 	return (true);
 }
 
