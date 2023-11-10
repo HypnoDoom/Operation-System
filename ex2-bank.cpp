@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #define N 3
 #define OVERFLOW 2
+#define ERROR -1
 #define max maxnn
 
 struct pcb {  //定义进程结构体
@@ -101,6 +102,7 @@ bool isSafe() {
 	return (true);
 }
 
+
 bool input() {  //控制用户输入进程以及系统资源
 	printf("请输入系统可用资源，请输入%d个数字：", N);
 	for (int i = 0; i < N; i++) {
@@ -122,6 +124,7 @@ bool input() {  //控制用户输入进程以及系统资源
 		printf("请输入已分配，请输入%d个数字：", N);
 		for (int j = 0; j < N; j++) {
 			scanf("%d", &(p->allo[j]));
+			available[j] -= p->allo[j];
 		}
 		for (int j = 0; j < N; j++) {  //计算进程的需求资源数量
 			p->need[j] = (p->max[j]) - (p->allo[j]);
@@ -130,6 +133,13 @@ bool input() {  //控制用户输入进程以及系统资源
 		p->next = NULL;
 		p->no = i;
 		sort();
+	}
+	for (int i = 0; i < N; i++) {  //检测已分配的资源是否已经超过系统可用资源，这种情况下一定不可能成立（造成此类情况可能是由于用户输入错误）
+		if (available[i] < 0) {
+			printf("所有已分配的资源数量之和超过了系统可用资源！\n"); 
+			//printf("系统不安全，可能会出现死锁。");
+			exit(ERROR);
+		}
 	}
 	printf("-----------------------------\n%d个进程添加成功！进程信息与系统资源如下：\n", count);
 	printf("No.\tMax\t\tAllocation\tNeed\n");
@@ -164,6 +174,13 @@ bool extraAllo() {
 			temp->allo[i] += change[i];
 			temp->need[i] -= change[i];
 			available[i] -= change[i];
+		}
+		for (int i = 0; i < N; i++) {  //检测已分配的资源是否已经超过系统可用资源，这种情况下一定不可能成立（造成此类情况可能是由于用户输入错误）
+			if (available[i] < 0) {
+				printf("所有已分配的资源数量之和超过了系统可用资源！\n"); 
+				//printf("系统不安全，可能会出现死锁。");
+				exit(ERROR);
+			}
 		}
 		printf("-----------------------------\n资源分配成功！新的进程信息与系统资源如下：\n");
 		printf("No.\tMax\t\tAllocation\tNeed\n");
