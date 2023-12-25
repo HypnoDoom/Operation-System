@@ -48,7 +48,7 @@ bool isIn(int number) {
     return false;
 }
 
-//将页面插入到内存中，
+//将页面插入到内存中，统计缺页次数
 void insert(int number) {
     if (isFull()) {
         int level = 0;
